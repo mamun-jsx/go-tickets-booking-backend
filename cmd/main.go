@@ -1,13 +1,15 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
+	"github.com/mamun-jsx/go-tickets-booking-backend.git/internal/config"
 	"github.com/mamun-jsx/go-tickets-booking-backend.git/internal/user"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 type User struct {
@@ -28,7 +30,9 @@ func (cv *CustomValidator) Validate(i any) error {
 	return nil
 }
 func main() {
-	dsn := "postgresql://neondb_owner:npg_5rXJsiavH1QP@ep-rapid-hat-b4hepzjn-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+	config := config.LoadEnv()
+
+	dsn := config.Dns
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		TranslateError: true,
 	})
