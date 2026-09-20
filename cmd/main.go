@@ -1,14 +1,13 @@
 package main
 
 import (
-	"errors"
-	"net/http"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
+	"github.com/mamun-jsx/go-tickets-booking-backend.git/internal/user"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"net/http"
 )
 
 type User struct {
@@ -59,29 +58,11 @@ func main() {
 	// =======================================
 	// create a user
 	// =======================================
-	e.POST("/users", func(c *echo.Context) error {
-		newUser := new(User) // new always make an empty strat and return the pointer
-		// ? binding the user data
-		if err := c.Bind(newUser); err != nil {
-			return err
-		}
+	userRepository := user.NewRepository(db)
+	userService := user.NewService(userRepository)
+	userHandler := user.NewHandler(userService)
+	e.POST("/users", userHandler.CreateUser)
 
-		// validating user data
-		if err := c.Validate(newUser); err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]any{"message": err.Error()})
-		}
-
-		// * save to database
-		result := db.Create(newUser) // save to database
-		if result.Error != nil {      // check the error
-			if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
-				return c.JSON(http.StatusConflict, map[string]any{"message": "Email already exists"})
-			}
-			return c.JSON(http.StatusInternalServerError, map[string]any{"error": result.Error.Error()})
-		}
-
-		return c.JSON(http.StatusOK, newUser)
-	})
 	if err := e.Start(":8080"); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
 	}
