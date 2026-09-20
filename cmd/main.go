@@ -56,12 +56,10 @@ func main() {
 	})
 
 	// =======================================
-	// create a user
+	//   user Route Register
 	// =======================================
-	userRepository := user.NewRepository(db)
-	userService := user.NewService(userRepository)
-	userHandler := user.NewHandler(userService)
-	e.POST("/users", userHandler.CreateUser)
+
+	user.RegisterRoutes(e, db)
 
 	if err := e.Start(":8080"); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
