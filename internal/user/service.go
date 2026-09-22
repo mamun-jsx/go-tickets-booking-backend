@@ -12,8 +12,7 @@ func NewService(repo Repository) *service {
 	}
 }
 
-
-// create user service 
+// create user service
 func (s *service) CreateUser(req dto.CreateRequest) (*dto.Response, error) {
 	// * take the repo create user function and call it and return the error
 	user := User{
@@ -21,10 +20,11 @@ func (s *service) CreateUser(req dto.CreateRequest) (*dto.Response, error) {
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	err := s.repo.CreateUser(&user)
+	err := user.hashPassword(req.Password)
 	if err != nil {
 		return nil, err
 	}
+
 	response := dto.Response{
 		ID:        user.ID,
 		Name:      user.Name,

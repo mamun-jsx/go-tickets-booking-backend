@@ -49,14 +49,12 @@ func (h *handler) CreateUser(c *echo.Context) error {
 	}
 
 	if err != nil {
-
 		return c.JSON(http.StatusInternalServerError, httpresponse.Error{
 			Code:    http.StatusInternalServerError,
 			Message: "Internal Server Error",
 			Details: err.Error(),
 		})
 	}
-
 	// success response
 	return c.JSON(http.StatusCreated, res)
 }
