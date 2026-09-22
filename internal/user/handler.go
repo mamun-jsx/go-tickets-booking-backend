@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/labstack/echo/v5"
@@ -38,6 +39,15 @@ func (h *handler) CreateUser(c *echo.Context) error {
 	}
 
 	res, err := h.service.CreateUser(req)
+
+	if errors.Is(err, ErrorAlreadyExist) {
+		return c.JSON(http.StatusConflict, httpresponse.Error{
+			Code:    http.StatusConflict,
+			Message: "Try another email",
+			Details: ErrorAlreadyExist.Error(),
+		})
+	}
+
 	if err != nil {
 
 		return c.JSON(http.StatusInternalServerError, httpresponse.Error{
