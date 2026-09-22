@@ -19,7 +19,7 @@ func NewHandler(service *service) *handler {
 	}
 }
 
-// create user
+// create user | Register
 
 func (h *handler) CreateUser(c *echo.Context) error {
 	var req dto.CreateRequest // user input
@@ -57,4 +57,39 @@ func (h *handler) CreateUser(c *echo.Context) error {
 	}
 	// success response
 	return c.JSON(http.StatusCreated, res)
+}
+func (h *handler) LoginUser(c *echo.Context) error {
+	var req dto.LoginRequest // user input payload is Email & password
+
+	// * input from user
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, httpresponse.Error{Code: http.StatusBadRequest, Message: "Invalid Input", Details: err.Error()})
+	}
+	// validate the input
+	if err := c.Validate(&req); err != nil {
+
+		return c.JSON(http.StatusBadRequest, httpresponse.Error{
+			Code:    http.StatusBadRequest,
+			Message: "Validation Failed",
+			Details: err.Error(),
+		})
+	}
+	response, err := h.service.LoginUser(req)
+	if err != nil {
+		if errors.Is(err, ErrorInvalidEmailPassword) {
+			return c.JSON(http.StatusUnauthorized, httpresponse.Error{
+				Code:    http.StatusUnauthorized,
+				Message: "Invalid Credentials",
+				Details: err.Error(),
+			})
+		}
+		
+		return c.JSON(http.StatusInternalServerError, httpresponse.Error{
+			Code:    http.StatusInternalServerError,
+			Message: "Internal Server Error",
+			Details: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
