@@ -8,7 +8,6 @@ import (
 	"github.com/labstack/echo/v5/middleware"
 	"github.com/mamun-jsx/go-tickets-booking-backend.git/internal/config"
 	"github.com/mamun-jsx/go-tickets-booking-backend.git/internal/user"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -30,20 +29,9 @@ func (cv *CustomValidator) Validate(i any) error {
 	return nil
 }
 func main() {
-	config := config.LoadEnv()
+	cfg := config.LoadEnv()
+	db := config.ConnectionDatabase(cfg) // database reorganise
 
-	dsn := config.Dns
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		TranslateError: true,
-	})
-
-	if err != nil {
-		panic("Failed to conncet databae")
-	} else {
-		println("===================================")
-		println("______Database connected______")
-		println("===================================")
-	}
 	// =========================Auto matically migrate and create table into db========================
 	db.AutoMigrate(&User{}) // user stract it will automatically make the table..
 
@@ -65,7 +53,7 @@ func main() {
 
 	user.RegisterRoutes(e, db)
 
-	if err := e.Start(":8080"); err != nil {
+	if err := e.Start(":" + cfg.Port); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
 	}
 }
